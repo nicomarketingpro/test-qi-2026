@@ -15,7 +15,7 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <button onclick="toggleMusic()" class="fixed top-4 right-4 bg-white p-3 rounded-full shadow-lg z-50">
+    <button id="music-btn" onclick="toggleMusic()" class="fixed top-4 right-4 bg-white p-3 rounded-full shadow-lg z-50 hidden">
         <span id="music-icon">🔇</span>
     </button>
     <audio id="bg-music" loop>
@@ -23,19 +23,36 @@
     </audio>
 
     <div id="quiz-container" class="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
-        <div class="mb-8">
-            <div class="flex justify-between items-center mb-4">
-                <span id="timer" class="text-sm font-bold text-red-500 font-mono">03:00</span>
-                <span id="step-counter" class="text-sm text-gray-400">Question 1/5</span>
+        
+        <div id="welcome-screen" class="text-center">
+            <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <span class="text-4xl">🧠</span>
             </div>
-            <div class="w-full bg-gray-100 h-2 rounded-full">
-                <div id="progress" class="bg-blue-600 h-2 rounded-full progress-bar" style="width: 20%"></div>
-            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">Évaluation Cognitive Officielle 2026</h1>
+            <p class="text-gray-500 mb-8 leading-relaxed">
+                Mesurez votre quotient intellectuel via cette évaluation standardisée. Le test dure 3 minutes et analyse votre logique fluide et vos capacités de déduction.
+            </p>
+            <button onclick="startQuiz()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-200">
+                COMMENCER LE TEST
+            </button>
+            <p class="mt-4 text-xs text-gray-400">Temps limité : 03:00 minutes</p>
         </div>
 
-        <div id="question-content">
-            <h2 id="question-text" class="text-2xl font-bold text-gray-800 mb-6">Chargement...</h2>
-            <div id="options" class="space-y-3"></div>
+        <div id="quiz-content" class="hidden">
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <span id="timer" class="text-sm font-bold text-red-500 font-mono">03:00</span>
+                    <span id="step-counter" class="text-sm text-gray-400">Question 1/5</span>
+                </div>
+                <div class="w-full bg-gray-100 h-2 rounded-full">
+                    <div id="progress" class="bg-blue-600 h-2 rounded-full progress-bar" style="width: 20%"></div>
+                </div>
+            </div>
+
+            <div id="question-area">
+                <h2 id="question-text" class="text-2xl font-bold text-gray-800 mb-6">Chargement...</h2>
+                <div id="options" class="space-y-3"></div>
+            </div>
         </div>
 
         <div id="analysis" class="hidden text-center py-8">
@@ -45,18 +62,16 @@
         </div>
 
         <div id="result-screen" class="hidden text-center">
-            <div class="bg-blue-50 p-6 rounded-2xl mb-6">
+            <div class="bg-blue-50 p-6 rounded-2xl mb-6 border border-blue-100">
                 <h2 class="text-2xl font-bold text-blue-700 mb-2">Test Terminé !</h2>
                 <p class="text-gray-700 text-sm leading-relaxed">
-                    Votre profil cognitif a été analysé. En raison de la précision de vos réponses, votre score se situe dans le <b>top 15%</b> des utilisateurs.
+                    Félicitations, vos réponses indiquent un haut potentiel intellectuel. Votre profil est prêt.
                 </p>
             </div>
             <button onclick="redirectToBeacons()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-200">
                 DÉBLOQUER MON RAPPORT (1€)
             </button>
-            <p class="mt-4 text-xs text-gray-400 italic text-center">
-                Inclus : Score précis + Certificat PDF + Correction détaillée.
-            </p>
+            <p class="mt-4 text-xs text-gray-400 italic">Score certifié + Rapport PDF envoyé par mail.</p>
         </div>
     </div>
 
@@ -72,15 +87,30 @@
         let currentStep = 0;
         let timeLeft = 180;
         let musicPlaying = false;
+        let timerInterval;
 
-        // Timer
-        const timerInterval = setInterval(() => {
-            timeLeft--;
-            const mins = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-            document.getElementById('timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            if (timeLeft <= 0) clearInterval(timerInterval);
-        }, 1000);
+        function startQuiz() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('quiz-content').classList.remove('hidden');
+            document.getElementById('music-btn').classList.remove('hidden');
+            
+            // Lancer la musique direct si tu veux (optionnel, sinon l'utilisateur clique sur l'icône)
+            loadQuestion();
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const mins = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                document.getElementById('timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showAnalysis();
+                }
+            }, 1000);
+        }
 
         function toggleMusic() {
             const audio = document.getElementById('bg-music');
@@ -123,9 +153,7 @@
 
         function showAnalysis() {
             clearInterval(timerInterval);
-            document.getElementById('question-content').classList.add('hidden');
-            document.getElementById('step-counter').classList.add('hidden');
-            document.getElementById('timer').classList.add('hidden');
+            document.getElementById('quiz-content').classList.add('hidden');
             document.getElementById('analysis').classList.remove('hidden');
             
             setTimeout(() => {
@@ -137,8 +165,6 @@
         function redirectToBeacons() {
             window.location.href = "https://shop.beacons.ai/nicomarket/d377256a-98a0-4f9b-b97c-8cab772ee682";
         }
-
-        loadQuestion();
     </script>
 </body>
 </html>
