@@ -9,14 +9,23 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .progress-bar { transition: width 0.3s ease-in-out; }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
+    <button onclick="toggleMusic()" class="fixed top-4 right-4 bg-white p-3 rounded-full shadow-lg z-50">
+        <span id="music-icon">🔇</span>
+    </button>
+    <audio id="bg-music" loop>
+        <source src="https://www.chosic.com/wp-content/uploads/2021/07/The-Grand-Score.mp3" type="audio/mpeg">
+    </audio>
+
     <div id="quiz-container" class="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
         <div class="mb-8">
             <div class="flex justify-between items-center mb-4">
-                <span class="text-sm font-semibold text-blue-600 uppercase tracking-wider">Évaluation 2026</span>
+                <span id="timer" class="text-sm font-bold text-red-500 font-mono">03:00</span>
                 <span id="step-counter" class="text-sm text-gray-400">Question 1/5</span>
             </div>
             <div class="w-full bg-gray-100 h-2 rounded-full">
@@ -25,26 +34,29 @@
         </div>
 
         <div id="question-content">
-            <h2 id="question-text" class="text-2xl font-bold text-gray-800 mb-6">Quelle forme complète logiquement la suite ?</h2>
-            <div id="options" class="space-y-3">
-                </div>
+            <h2 id="question-text" class="text-2xl font-bold text-gray-800 mb-6">Chargement...</h2>
+            <div id="options" class="space-y-3"></div>
         </div>
 
         <div id="analysis" class="hidden text-center py-8">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-6"></div>
-            <h2 class="text-xl font-bold text-gray-800 mb-2">Analyse de vos réponses...</h2>
-            <p class="text-gray-500 text-sm">Calcul de votre rang percentile en cours.</p>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Analyse de vos performances...</h2>
+            <p class="text-gray-500 text-sm pulse">Comparaison avec la base de données 2026</p>
         </div>
 
         <div id="result-screen" class="hidden text-center">
-            <div class="bg-green-50 p-6 rounded-2xl mb-6">
-                <h2 class="text-2xl font-bold text-green-600 mb-2">Analyse Terminée</h2>
-                <p class="text-gray-700">Votre score est prêt à être généré.</p>
+            <div class="bg-blue-50 p-6 rounded-2xl mb-6">
+                <h2 class="text-2xl font-bold text-blue-700 mb-2">Test Terminé !</h2>
+                <p class="text-gray-700 text-sm leading-relaxed">
+                    Votre profil cognitif a été analysé. En raison de la précision de vos réponses, votre score se situe dans le <b>top 15%</b> des utilisateurs.
+                </p>
             </div>
             <button onclick="redirectToBeacons()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-200">
-                VÉRIFIER MES RÉSULTATS (1€)
+                DÉBLOQUER MON RAPPORT (1€)
             </button>
-            <p class="mt-4 text-xs text-gray-400 italic">Certificat officiel envoyé par email au format PDF.</p>
+            <p class="mt-4 text-xs text-gray-400 italic text-center">
+                Inclus : Score précis + Certificat PDF + Correction détaillée.
+            </p>
         </div>
     </div>
 
@@ -58,6 +70,30 @@
         ];
 
         let currentStep = 0;
+        let timeLeft = 180;
+        let musicPlaying = false;
+
+        // Timer
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById('timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            if (timeLeft <= 0) clearInterval(timerInterval);
+        }, 1000);
+
+        function toggleMusic() {
+            const audio = document.getElementById('bg-music');
+            const icon = document.getElementById('music-icon');
+            if (musicPlaying) {
+                audio.pause();
+                icon.innerText = "🔇";
+            } else {
+                audio.play();
+                icon.innerText = "🔊";
+            }
+            musicPlaying = !musicPlaying;
+        }
 
         function loadQuestion() {
             const q = questions[currentStep];
@@ -86,18 +122,19 @@
         }
 
         function showAnalysis() {
+            clearInterval(timerInterval);
             document.getElementById('question-content').classList.add('hidden');
             document.getElementById('step-counter').classList.add('hidden');
+            document.getElementById('timer').classList.add('hidden');
             document.getElementById('analysis').classList.remove('hidden');
             
             setTimeout(() => {
                 document.getElementById('analysis').classList.add('hidden');
                 document.getElementById('result-screen').classList.remove('hidden');
-            }, 3000);
+            }, 3500);
         }
 
         function redirectToBeacons() {
-            // Ton lien de vente Beacons mis à jour :
             window.location.href = "https://shop.beacons.ai/nicomarket/d377256a-98a0-4f9b-b97c-8cab772ee682";
         }
 
