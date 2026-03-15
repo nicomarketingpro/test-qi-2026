@@ -4,128 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test de QI Officiel 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow-x: hidden; }
-        .card { background: white; max-width: 450px; width: 90%; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; position: relative; }
-        .logo { width: 50px; margin-bottom: 15px; }
-        h1 { font-size: 22px; margin-bottom: 10px; color: #0f172a; }
-        .timer-box { background: #f1f5f9; padding: 10px; border-radius: 12px; margin-bottom: 20px; font-weight: bold; color: #2563eb; font-size: 1.2rem; }
-        
-        #quiz-container, #loading-screen { display: none; }
-        .question-text { font-size: 18px; font-weight: 600; margin-bottom: 20px; min-height: 60px; }
-        .options { display: grid; gap: 10px; }
-        .option-btn { padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; background: white; cursor: pointer; transition: 0.2s; font-weight: 500; font-size: 16px; }
-        .option-btn:hover { border-color: #2563eb; background: #f8fafc; }
-        .progress-bar { height: 6px; background: #e2e8f0; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
-        .progress-fill { height: 100%; background: #2563eb; width: 0%; transition: 0.3s; }
-        
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .btn-main { background: #2563eb; color: white; padding: 16px; border: none; border-radius: 12px; width: 100%; font-weight: 600; cursor: pointer; font-size: 18px; }
-        #mute-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; cursor: pointer; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .progress-bar { transition: width 0.3s ease-in-out; }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex items-center justify-center p-4">
 
-<audio id="bg-music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3"></audio>
+    <div id="quiz-container" class="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-sm font-semibold text-blue-600 uppercase tracking-wider">Évaluation 2026</span>
+                <span id="step-counter" class="text-sm text-gray-400">Question 1/5</span>
+            </div>
+            <div class="w-full bg-gray-100 h-2 rounded-full">
+                <div id="progress" class="bg-blue-600 h-2 rounded-full progress-bar" style="width: 20%"></div>
+            </div>
+        </div>
 
-<div class="card">
-    <button id="mute-btn" onclick="toggleMute()">🔊</button>
-    <div class="timer-box" id="global-timer">Temps restant : 03:00</div>
+        <div id="question-content">
+            <h2 id="question-text" class="text-2xl font-bold text-gray-800 mb-6">Quelle forme complète logiquement la suite ?</h2>
+            <div id="options" class="space-y-3">
+                </div>
+        </div>
 
-    <div id="home-screen">
-        <img src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png" class="logo">
-        <h1>Évaluation Cognitive</h1>
-        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Analyse de logique en temps réel.<br>Veuillez activer le son pour l'immersion.</p>
-        <button class="btn-main" onclick="startQuiz()">COMMENCER LE TEST</button>
+        <div id="analysis" class="hidden text-center py-8">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-6"></div>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Analyse de vos réponses...</h2>
+            <p class="text-gray-500 text-sm">Calcul de votre rang percentile en cours.</p>
+        </div>
+
+        <div id="result-screen" class="hidden text-center">
+            <div class="bg-green-50 p-6 rounded-2xl mb-6">
+                <h2 class="text-2xl font-bold text-green-600 mb-2">Analyse Terminée</h2>
+                <p class="text-gray-700">Votre score est prêt à être généré.</p>
+            </div>
+            <button onclick="redirectToBeacons()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-200">
+                VÉRIFIER MES RÉSULTATS (1€)
+            </button>
+            <p class="mt-4 text-xs text-gray-400 italic">Certificat officiel envoyé par email au format PDF.</p>
+        </div>
     </div>
 
-    <div id="quiz-container">
-        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-        <div class="question-text" id="question">Chargement...</div>
-        <div class="options" id="options"></div>
-    </div>
+    <script>
+        const questions = [
+            { q: "Quelle forme complète la suite : Cercle, Carré, Pentagone... ?", a: ["Triangle", "Hexagone", "Ligne", "Point"], c: 1 },
+            { q: "Si 2 + 2 = 4, alors 8 + 8 = ?", a: ["12", "14", "16", "20"], c: 2 },
+            { q: "Complétez la suite : 2, 4, 8, 16... ?", a: ["20", "24", "30", "32"], c: 3 },
+            { q: "Le fils du père de mon frère est ?", a: ["Mon cousin", "Mon frère", "Mon oncle", "Mon fils"], c: 1 },
+            { q: "Lequel est un intrus ?", a: ["Paris", "Lyon", "Marseille", "Berlin"], c: 3 }
+        ];
 
-    <div id="loading-screen">
-        <div class="spinner"></div>
-        <h3>Analyse terminée !</h3>
-        <p style="color: #64748b; font-size: 14px;">Nous préparons l'accès à vos résultats sécurisés...</p>
-    </div>
-</div>
+        let currentStep = 0;
 
-<script>
-    let timeLeft = 180;
-    let timerId;
-    let music = document.getElementById('bg-music');
-    
-    const questions = [
-        { q: "Quelle forme suit logiquement : Cercle, Carré, Pentagone, ... ?", a: ["Hexagone", "Triangle", "Ligne", "Cube"] },
-        { q: "Si 2+2=4 et 4+4=8, combien font 8+8 ?", a: ["12", "16", "24", "32"] },
-        { q: "Complétez la suite : 2, 4, 8, 16, ...", a: ["24", "30", "32", "64"] },
-        { q: "Le frère de ma sœur est le fils de mon père. Qui est-il ?", a: ["Mon oncle", "Mon cousin", "Mon frère", "Moi-même"] },
-        { q: "Quelle ville est l'intrus ?", a: ["Paris", "Lyon", "Berlin", "Marseille"] }
-    ];
-
-    let currentQ = 0;
-
-    function toggleMute() {
-        music.muted = !music.muted;
-        document.getElementById('mute-btn').innerText = music.muted ? "ⱽ" : "🔊";
-    }
-
-    function startTimer() {
-        timerId = setInterval(() => {
-            timeLeft--;
-            let mins = Math.floor(timeLeft / 60);
-            let secs = timeLeft % 60;
-            document.getElementById('global-timer').innerText = `Temps restant : ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            if (timeLeft <= 0) finishQuiz();
-        }, 1000);
-    }
-
-    function startQuiz() {
-        music.play();
-        document.getElementById('home-screen').style.display = 'none';
-        document.getElementById('quiz-container').style.display = 'block';
-        startTimer();
-        showQuestion();
-    }
-
-    function showQuestion() {
-        const q = questions[currentQ];
-        document.getElementById('question').innerText = q.q;
-        const optionsDiv = document.getElementById('options');
-        optionsDiv.innerHTML = '';
-        q.a.forEach((opt) => {
-            const btn = document.createElement('button');
-            btn.className = 'option-btn';
-            btn.innerText = opt;
-            btn.onclick = () => nextQuestion();
-            optionsDiv.appendChild(btn);
-        });
-        document.getElementById('progress').style.width = ((currentQ / questions.length) * 100) + '%';
-    }
-
-    function nextQuestion() {
-        currentQ++;
-        if (currentQ < questions.length) {
-            showQuestion();
-        } else {
-            finishQuiz();
+        function loadQuestion() {
+            const q = questions[currentStep];
+            document.getElementById('question-text').innerText = q.q;
+            document.getElementById('step-counter').innerText = `Question ${currentStep + 1}/5`;
+            document.getElementById('progress').style.width = `${(currentStep + 1) * 20}%`;
+            
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            q.a.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-2xl border-2 border-gray-100 hover:border-blue-600 hover:bg-blue-50 transition-all font-medium text-gray-700";
+                btn.innerText = opt;
+                btn.onclick = () => nextStep();
+                optionsDiv.appendChild(btn);
+            });
         }
-    }
 
-    function finishQuiz() {
-        clearInterval(timerId);
-        document.getElementById('quiz-container').style.display = 'none';
-        document.getElementById('global-timer').style.display = 'none';
-        document.getElementById('loading-screen').style.display = 'block';
-        setTimeout(() => {
-            // METS TON LIEN BEACONS ICI :
-            window.location.href = "https://beacons.ai/TON_PSEUDO";
-        }, 3500);
-    }
-</script>
+        function nextStep() {
+            currentStep++;
+            if (currentStep < questions.length) {
+                loadQuestion();
+            } else {
+                showAnalysis();
+            }
+        }
 
+        function showAnalysis() {
+            document.getElementById('question-content').classList.add('hidden');
+            document.getElementById('step-counter').classList.add('hidden');
+            document.getElementById('analysis').classList.remove('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('analysis').classList.add('hidden');
+                document.getElementById('result-screen').classList.remove('hidden');
+            }, 3000);
+        }
+
+        function redirectToBeacons() {
+            // Ton lien de vente Beacons mis à jour :
+            window.location.href = "https://shop.beacons.ai/nicomarket/d377256a-98a0-4f9b-b97c-8cab772ee682";
+        }
+
+        loadQuestion();
+    </script>
 </body>
 </html>
