@@ -22,17 +22,21 @@
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .btn-main { background: #2563eb; color: white; padding: 16px; border: none; border-radius: 12px; width: 100%; font-weight: 600; cursor: pointer; font-size: 18px; }
+        #mute-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
 
+<audio id="bg-music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3"></audio>
+
 <div class="card">
+    <button id="mute-btn" onclick="toggleMute()">🔊</button>
     <div class="timer-box" id="global-timer">Temps restant : 03:00</div>
 
     <div id="home-screen">
         <img src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png" class="logo">
         <h1>Évaluation Cognitive</h1>
-        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Session officielle 2026.<br>Analyse de logique et raisonnement.</p>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Analyse de logique en temps réel.<br>Veuillez activer le son pour l'immersion.</p>
         <button class="btn-main" onclick="startQuiz()">COMMENCER LE TEST</button>
     </div>
 
@@ -50,8 +54,10 @@
 </div>
 
 <script>
-    let timeLeft = 180; // 3 minutes en secondes
+    let timeLeft = 180;
     let timerId;
+    let music = document.getElementById('bg-music');
+    
     const questions = [
         { q: "Quelle forme suit logiquement : Cercle, Carré, Pentagone, ... ?", a: ["Hexagone", "Triangle", "Ligne", "Cube"] },
         { q: "Si 2+2=4 et 4+4=8, combien font 8+8 ?", a: ["12", "16", "24", "32"] },
@@ -61,6 +67,11 @@
     ];
 
     let currentQ = 0;
+
+    function toggleMute() {
+        music.muted = !music.muted;
+        document.getElementById('mute-btn').innerText = music.muted ? "ⱽ" : "🔊";
+    }
 
     function startTimer() {
         timerId = setInterval(() => {
@@ -73,6 +84,7 @@
     }
 
     function startQuiz() {
+        music.play();
         document.getElementById('home-screen').style.display = 'none';
         document.getElementById('quiz-container').style.display = 'block';
         startTimer();
@@ -108,10 +120,9 @@
         document.getElementById('quiz-container').style.display = 'none';
         document.getElementById('global-timer').style.display = 'none';
         document.getElementById('loading-screen').style.display = 'block';
-        
         setTimeout(() => {
-            // REMPLACE BIEN PAR TON LIEN BEACONS ICI :
-            window.location.href = "https://beacons.ai/TON_NOM_BEACONS";
+            // METS TON LIEN BEACONS ICI :
+            window.location.href = "https://beacons.ai/TON_PSEUDO";
         }, 3500);
     }
 </script>
